@@ -1,0 +1,464 @@
+<?php $this->load->view('member/include/dijkstra.php') ?>
+<div class="main-content">
+    <div class="main-content-inner">
+        <!-- #section:basics/content.breadcrumbs -->
+        <div class="breadcrumbs" id="breadcrumbs">
+            <style>
+				#mapCanvas {
+					width: 700px;
+					height: 300px;
+				  }
+				  #infoPanel {
+					float: left;
+					margin-left: 10px;
+				  }
+				  #infoPanel div {
+					margin-bottom: 5px;
+				  }
+			</style>
+			<script type="text/javascript">
+			
+                try {
+                    ace.settings.check('breadcrumbs', 'fixed')
+                } catch (e) {
+                }
+				
+				var geocoder;
+				var map;
+				var marker;
+
+				codeAddress = function () {
+					geocoder = new google.maps.Geocoder();
+				  
+					var input = document.getElementById('info2').value;
+					var latlngStr = input.split(',', 2);
+					var latlng = {lat: parseFloat(latlngStr[0]), lng: parseFloat(latlngStr[1])};
+					geocoder.geocode( { 'location':latlng }, function(results, status) {
+					if (status == google.maps.GeocoderStatus.OK) {
+					map = new google.maps.Map(document.getElementById('mapCanvas'), {
+					zoom: 15,
+						streetViewControl: false,
+						mapTypeControlOptions: {
+						style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+						mapTypeIds:[google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.ROADMAP] 
+					},
+					center: results[0].geometry.location,
+					mapTypeId: google.maps.MapTypeId.ROADMAP
+				  });
+					  map.setCenter(results[0].geometry.location);
+					  marker = new google.maps.Marker({
+						  map: map,
+						  position: results[0].geometry.location,
+						  draggable: true,
+						  title: 'My Title'
+					  });
+					  updateMarkerPosition(results[0].geometry.location);
+					  geocodePosition(results[0].geometry.location);
+						
+					  // Add dragging event listeners.
+				  google.maps.event.addListener(marker, 'dragstart', function() {
+					updateMarkerAddress('Dragging...');
+				  });
+					  
+				  google.maps.event.addListener(marker, 'drag', function() {
+					updateMarkerStatus('Dragging...');
+					updateMarkerPosition(marker.getPosition());
+				  });
+				  
+				  google.maps.event.addListener(marker, 'dragend', function() {
+					updateMarkerStatus('Drag ended');
+					geocodePosition(marker.getPosition());
+					  map.panTo(marker.getPosition()); 
+				  });
+				  
+				  google.maps.event.addListener(map, 'click', function(e) {
+					updateMarkerPosition(e.latLng);
+					geocodePosition(marker.getPosition());
+					marker.setPosition(e.latLng);
+				  map.panTo(marker.getPosition()); 
+				  }); 
+				  
+					} else {
+					  alert('Geocode was not successful for the following reason: ' + status);
+					}
+				  });
+				}
+
+				function geocodePosition(pos) {
+				  geocoder.geocode({
+					latLng: pos
+				  }, function(responses) {
+					if (responses && responses.length > 0) {
+					  updateMarkerAddress(responses[0].formatted_address);
+					} else {
+					  updateMarkerAddress('Cannot determine address at this location.');
+					}
+				  });
+				}
+
+				function updateMarkerStatus(str) {
+				  document.getElementById('markerStatus').innerHTML = str;
+				}
+
+				function updateMarkerPosition(latLng) {
+				  document.getElementById('info').text = [
+					latLng.lat(),
+					latLng.lng()
+				  ].join(', ');
+				  $('#info2').val([
+					latLng.lat(),
+					latLng.lng()
+				  ].join(', '));
+				}
+
+				function updateMarkerAddress(str) {
+				  document.getElementById('alamat').innerHTML = str;
+				}
+
+				window.onload = function() {
+				  codeAddress();
+				};
+            </script>
+			
+            <ul class="breadcrumb">
+                <li>
+                    <i class="ace-icon fa fa-home home-icon"></i>
+                    <a href="<?php echo base_url('admin/dashboard') ?>">Beranda</a>
+                </li>
+
+                
+                <li class="active">Data Umkm</li>
+            </ul><!-- /.breadcrumb -->
+
+            <!-- /section:basics/content.searchbox -->
+        </div>
+
+        <!-- /section:basics/content.breadcrumbs -->
+        <div class="page-content">
+            <!-- #section:settings.box -->
+            <div class="ace-settings-container" id="ace-settings-container">
+                <div class="btn btn-app btn-xs btn-warning ace-settings-btn" id="ace-settings-btn">
+                    <i class="ace-icon fa fa-cog bigger-130"></i>
+                </div>
+
+                <div class="ace-settings-box clearfix" id="ace-settings-box">
+                    <div class="pull-left width-50">
+                        <!-- #section:settings.skins -->
+                        <div class="ace-settings-item">
+                            <div class="pull-left">
+                                <select id="skin-colorpicker" class="hide">
+                                    <option data-skin="no-skin" value="#438EB9">#438EB9</option>
+                                    <option data-skin="skin-1" value="#222A2D">#222A2D</option>
+                                    <option data-skin="skin-2" value="#C6487E">#C6487E</option>
+                                    <option data-skin="skin-3" value="#D0D0D0">#D0D0D0</option>
+                                </select>
+                            </div>
+                            <span>&nbsp; Choose Skin</span>
+                        </div>
+
+                        <!-- /section:settings.skins -->
+
+                        <!-- #section:settings.navbar -->
+                        <div class="ace-settings-item">
+                            <input type="checkbox" class="ace ace-checkbox-2" id="ace-settings-navbar" />
+                            <label class="lbl" for="ace-settings-navbar"> Fixed Navbar</label>
+                        </div>
+
+                        <!-- /section:settings.navbar -->
+
+                        <!-- #section:settings.sidebar -->
+                        <div class="ace-settings-item">
+                            <input type="checkbox" class="ace ace-checkbox-2" id="ace-settings-sidebar" />
+                            <label class="lbl" for="ace-settings-sidebar"> Fixed Sidebar</label>
+                        </div>
+
+                        <!-- /section:settings.sidebar -->
+
+                        <!-- #section:settings.breadcrumbs -->
+                        <div class="ace-settings-item">
+                            <input type="checkbox" class="ace ace-checkbox-2" id="ace-settings-breadcrumbs" />
+                            <label class="lbl" for="ace-settings-breadcrumbs"> Fixed Breadcrumbs</label>
+                        </div>
+
+                        <!-- /section:settings.breadcrumbs -->
+
+                        <!-- #section:settings.rtl -->
+                        <div class="ace-settings-item">
+                            <input type="checkbox" class="ace ace-checkbox-2" id="ace-settings-rtl" />
+                            <label class="lbl" for="ace-settings-rtl"> Right To Left (rtl)</label>
+                        </div>
+
+                        <!-- /section:settings.rtl -->
+
+                        <!-- #section:settings.container -->
+                        <div class="ace-settings-item">
+                            <input type="checkbox" class="ace ace-checkbox-2" id="ace-settings-add-container" />
+                            <label class="lbl" for="ace-settings-add-container">
+                                Inside
+                                <b>.container</b>
+                            </label>
+                        </div>
+
+                        <!-- /section:settings.container -->
+                    </div><!-- /.pull-left -->
+
+                    <div class="pull-left width-50">
+                        <!-- #section:basics/sidebar.options -->
+                        <div class="ace-settings-item">
+                            <input type="checkbox" class="ace ace-checkbox-2" id="ace-settings-hover" />
+                            <label class="lbl" for="ace-settings-hover"> Submenu on Hover</label>
+                        </div>
+
+                        <div class="ace-settings-item">
+                            <input type="checkbox" class="ace ace-checkbox-2" id="ace-settings-compact" />
+                            <label class="lbl" for="ace-settings-compact"> Compact Sidebar</label>
+                        </div>
+
+                        <div class="ace-settings-item">
+                            <input type="checkbox" class="ace ace-checkbox-2" id="ace-settings-highlight" />
+                            <label class="lbl" for="ace-settings-highlight"> Alt. Active Item</label>
+                        </div>
+
+                        <!-- /section:basics/sidebar.options -->
+                    </div><!-- /.pull-left -->
+                </div><!-- /.ace-settings-box -->
+            </div><!-- /.ace-settings-container -->
+
+            <!-- /section:settings.box -->
+            <div class="page-header">
+                <h1>
+                    Data Umkm
+                
+                </h1>
+            </div><!-- /.page-header -->
+
+            <div class="row">
+                <div class="col-xs-12">
+
+
+						<!--
+						<h4 class="pink">
+							<i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue"></i>
+							<a href="#modal-table" role="button" class="green" data-toggle="modal"> Table Inside a Modal Box </a>
+						</h4>
+					-->
+
+					<div class="row">
+						<div class="col-xs-12">
+
+							<div class="clearfix">
+
+								<?php echo $this->session->flashdata('msgbox') ?>
+							</div>
+							<div class="table-header">
+								Menampilkan Seluruh Data Umkm
+							</div>
+
+							<!-- div.table-responsive -->
+							<div class="modal-footer no-margin-top"> 
+								<form method="GET">
+									<div class="form-group">
+										<div class="col-md-3">
+											<select class="form-control selectpicker" name="kategori" data-live-search="true">
+											
+												<option value="">Pilih Kategori Umkm</option>
+												<?php foreach ($kategori as $fkey => $value) { ?>
+													<option value="<?= $value->id_kategori; ?>" <?= check_selected($kategoriNol, $value->id_kategori); ?> ><?= $value->namaKategori; ?></option>
+												<?php } ?>
+											</select>
+										</div>
+										<div class="col-md-2">
+											<button type="submit" class="btn btn-primary btn-sm">Ok</button>
+											<a href="<?= base_url('admin/analisis/hasil')?>" class="btn btn-danger btn-sm">Clear Filter</a>
+										</div>
+									</div>
+								</form>
+
+							</div>
+							<!-- div.dataTables_borderWrap -->
+							<?php if(empty($umkm)){
+											
+							} else {?>
+							<div>
+								<table id="dynamic-table" class="table table-striped table-bordered table-hover">
+									<thead>
+										<tr>
+											<th>No</th>
+											<th>Nama Umkm</th>
+											<th>Produk</th>
+											<th>Telepon</th>
+										</tr>
+									</thead> 
+									<tbody>
+										<?php 
+											$no = 0;
+											foreach ($umkm as $val){
+											$no ++;
+										?>
+										<tr>
+											<td><?= $no?></td>
+											<td><?= $val->nama_umkm?></td>
+											<td><?= $val->produk?></td>
+											<td><?= $val->telepon?></td>
+										</tr>
+											<?php } ?>
+									</tbody>
+								</table> 
+							
+							</div>
+							<br>
+							<?php
+							// $graph[0][0] = '1->10';
+							// $graph[0][1] = '2->11';
+							// $graph[0][2] = '3->40';
+
+							// $graph[1][0] = '0->10';
+							// $graph[1][1] = '2->55';
+							// $graph[1][2] = '4->20';
+
+							// $graph[2][0] = '0->11';
+							// $graph[2][1] = '1->55';
+							// $graph[2][2] = '1->54';
+
+							// $graph[3][0] = '4->89';
+							// $graph[3][1] = '4->89';
+
+							// $graph[4][0] = '0->90';
+							// $graph[4][1] = '3->89';
+
+									// $algo = new Dijkstra();
+									// $json = $algo->jalurTerpendek($graph, 0, 1);
+									// $array= json_decode($json, true);
+								
+									// if($array['status'] == 'success'){
+										// echo "Jalur Terdekat : " . $array['content'];
+									// }else{
+										// echo "Error : " . $array['teks'];
+									// }
+							
+							foreach ($umkm as $fetch){
+								$point1 = array("lat" => "-7.2756141", "long" => "112.6416438"); // Paris (France)
+								$point2 = array("lat" => $fetch->lat, "long" => $fetch->long); // Mexico City (Mexico)
+								$km     = distanceCalculation($point1['lat'], $point1['long'], $point2['lat'], $point2['long']); // Calculate distance in kilometres (default)
+								$mi     = distanceCalculation($point1['lat'], $point1['long'], $point2['lat'], $point2['long'], 'mi'); // Calculate distance in miles
+								$nmi    = distanceCalculation($point1['lat'], $point1['long'], $point2['lat'], $point2['long'], 'nmi'); // Calculate distance in nautical miles
+								//echo "Jarak Antara Lokasi Anda dan ".$fetch->alamat." is $km km (= $mi miles = $nmi nautical miles)";
+							}
+							
+							?>
+							<div class="clearfix">
+
+								<?php echo $this->session->flashdata('msgbox') ?>
+							</div>
+							<div class="table-header">
+								Hasil Analisa Umkm Terdekat
+							</div>
+
+							<!-- div.table-responsive -->
+							<div class="modal-footer no-margin-top" style="text-align:left;"> 
+								<b>Lokasi Anda</b> : 
+							</div>
+							<div>
+								<table id="dynamic-table" class="table table-striped table-bordered table-hover">
+									<thead>
+										<tr>
+											<th>No</th>
+											<th>Nama Umkm</th>
+											<th>Produk</th>
+											<th>Telepon</th>
+											<th>Alamat</th>
+											<th>Jarak</th>
+										</tr>
+									</thead> 
+									<tbody>
+										<?php 
+											$no = 0;
+											foreach ($umkm as $fetch){
+												// $point1 = array("lat" => "-7.2756141", "long" => "112.6416438"); // Paris (France)
+												// $point2 = array("lat" => $fetch->lat, "long" => $fetch->long); // Mexico City (Mexico)
+												// $km = distanceCalculation($point1['lat'], $point1['long'], $point2['lat'], $point2['long']); // Calculate distance in kilometres (default)
+												// $mi = distanceCalculation($point1['lat'], $point1['long'], $point2['lat'], $point2['long'], 'mi'); // Calculate distance in miles
+												// $nmi = distanceCalculation($point1['lat'], $point1['long'], $point2['lat'], $point2['long'], 'nmi'); // Calculate distance in nautical miles
+												// //echo "Jarak Antara Lokasi Anda dan ".$fetch->alamat." is $km km (= $mi miles = $nmi nautical miles)";
+												
+												// $graph = array(
+												// 	'A' => array('B' => $km, 'D' => $km, 'F' => $km),
+												// 	'B' => array('A' => $km, 'C' => $km, 'D' => $km, 'F' => $km),
+												// 	'C' => array('B' => $km, 'E' => $km, 'F' => $km),
+												// 	'D' => array('A' => $km, 'B' => $km, 'E' => $km),
+												// 	'E' => array('C' => $km, 'D' => $km),
+												// 	'F' => array('A' => $km, 'B' => $km, 'C' => $km),
+												// 	'G' => array(),
+												// );
+
+												// $algorithm = new \Fisharebest\Algorithm\Dijkstra($graph);
+
+												// // There can be zero, one or more shortest (i.e. same total cost) paths.
+
+												// // No shortest path.
+												// $path = $algorithm->shortestPaths('A', 'G'); // array()
+
+												// // Exactly one shortest path.
+												// $path = $algorithm->shortestPaths('A', 'E'); // array(array('A', 'B', 'D', 'E'))
+
+												// // Multiple solutions with the same shortest path.
+												// $path = $algorithm->shortestPaths('E', 'F'); // array(array('E', 'D', 'B', 'F'), array('E', 'C', 'F'))
+
+												// // To find next-shortest paths, exclude one or more intermediate nodes from the shortest path.
+												// $path = $algorithm->shortestPaths('A', 'E'); // array(array('A', 'B', 'D', 'E'))
+												// $path = $algorithm->shortestPaths('A', 'E', array('B')); // array(array('A', 'B', 'D', 'E'))
+												// $path = $algorithm->shortestPaths('A', 'E', array('D')); // array(array('A', 'B', 'C', 'E'))
+												// $path = $algorithm->shortestPaths('A', 'E', array('B', 'D')); // array(array('A', 'F', 'C', 'E'))
+												// $kkk = json_encode($path);
+											$no ++;
+										?>
+										<tr>
+											<td><?= $no?></td>
+											<td><?= $fetch->nama_umkm?></td>
+											<td><?= $fetch->produk?></td>
+											<td><?= $fetch->telepon?></td>
+											<td><?= $fetch->alamat?></td>
+											<td><?= $km ?> KM</td>
+										</tr>
+										<?php }?>
+									</tbody>
+								</table> 
+							</div>
+							<div class="form-group control-label">
+								<div class="col-sm-12">
+								<?php 
+									foreach ($umkm as $uKey => $valUmkm){
+								?>
+								   <input type="hidden" name="koordinat" id="info2" value="<?php echo $valUmkm->lat.",".$valUmkm->long;?>" required class="form-control" placeholder="Masukan Koordinat Kosant"/>
+									<?php }
+									?>
+									<div id="panel" style="visibility:hidden;>
+										<input id="city_country" type="textbox" value="Surabaya">
+										<input type="button" value="Geocode" onclick="codeAddress()"> 
+									</div>  
+								
+									<div id="infoPanel" style="visibility:hidden; height:1px;">
+											<b>Marker status:</b>
+											<div id="markerStatus"><i>Click and drag the marker.</i></div>
+											<b>Current position:</b>
+											<div id="info"></div>
+											<b>Cl
+										</div> 
+										<div id="mapCanvas"></div>
+									</div>
+							</div>
+							<?php 
+							} 
+							?>
+						</div>
+					</div><!-- /.modal-dialog -->
+				</div>
+            </div><!-- PAGE CONTENT ENDS -->
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+</div><!-- /.page-content -->
+</div>
+</div><!-- /.main-content -->
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAimmxpez6ejTwZ0EZYNEgQmfHco7NJ0RQ">
+</script>

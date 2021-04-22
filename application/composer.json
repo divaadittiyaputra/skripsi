@@ -1,0 +1,13 @@
+{
+    "name": "kpptech/djikstra",
+    "authors": [
+        {
+            "name": "rfath",
+            "email": "fati@kpptechnology.co.id"
+        }
+    ],
+    "require": {
+        "taniko/dijkstra": "^1.1",
+        "fisharebest/algorithm": "^1.5"
+    }
+}
